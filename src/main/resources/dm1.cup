@@ -1,0 +1,49 @@
+package compil;
+import compil.ast.*; // définition de l'AST
+/* Section 1 : code utilisateur inclus en préambule de   */
+/* la classe de l'analyseur syntaxique : package, import */
+
+/* Section 2 : code ajouté dans l'analyseur syntaxique   */
+init with {:
+/* code dans le constructeur de la classe de l'analyseur */
+/* syntaxique : action initiale dans user_init           */
+System.out.println("Début de l'analyse syntaxique.");
+:}
+
+parser code {:
+/* code dans la classe de l'analyseur syntaxique        */
+  static void prompt() { System.out.print("> "); }
+// Table de symboles (static et classe parser pour visibilité)
+public static java.util.Map<String, Integer> symTab = new java.util.HashMap<>() ;
+// Gestion des variables non initialisées
+public static Integer symTabGet(String v) {
+  Integer val = symTab.get(v);
+  if (val!=null) return val ;
+  System.out.println("Warning : " + v + " non initialisé");
+  symTab.put(v,0);  // initialisation implicite 
+  return 0;
+}
+:}
+
+action code {:
+/* code dans la classe interne "action" de l'analyseur  */
+/* syntaxique : du code utilitaire pour les actions     */
+:};
+
+/* Section 3 : les symboles pour les règles syntaxiques */
+/* avec ensuite les règles de précédence                */
+/* Lexèmes (Tokens) */
+terminal MOT;
+
+/* Lexèmes avec valeur sémantique */
+nonterminal axiome;
+nonterminal motpoursquelette;
+
+/* Variables de la grammaire et Arbre de syntaxe */
+
+/* Section 4 : les règles syntaxiques avec les actions  */
+axiome     ::= /* vide */
+            |  axiome motpoursquelette
+;
+motpoursquelette ::= MOT
+;

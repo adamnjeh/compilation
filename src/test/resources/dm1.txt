@@ -1,0 +1,25 @@
+class Test1 {
+  int a;
+
+  public int calculer(int i) {
+    int k;
+    System.out.println(a);
+    System.out.println(i);
+    System.out.println(k);
+    return k;
+  }
+
+  public int un() { return 1; }
+
+  int b;
+}
+
+
+class Test2 extends Test1 {
+  Test1 attribut1;
+  public int zero() {
+    int variable1;
+    Test1 variable2;
+    return 0;
+  }
+}
