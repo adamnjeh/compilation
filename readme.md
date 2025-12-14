@@ -15,18 +15,18 @@ Sommaire de ce fichier avec le barème à titre indicatif :
 
 ## 0. Binôme
 
-- Nom1 Prénom1
-- Nom2 Prénom2
+- Hassine Zaabar Azer
+- Njeh Adam
 
 ## 1. État d'avancement
 
 Cocher une case à cocher ([X]) lorsque la tâche est accomplie.
 
-- [] Récupérer le projet GitLabEnse `csc4251_4252-dm1`
+- [x] Récupérer le projet GitLabEnse `csc4251_4252-dm1`
   - Soit télécharger une archive depuis le site Web GitLabEnse.
   - Soit `git clone`.
-- [] Indiquer les noms et prénoms dans la section précédante.
-- [] Indiquer les noms et prénoms dans le champ `<artifactId>` du
+- [x] Indiquer les noms et prénoms dans la section précédante.
+- [x] Indiquer les noms et prénoms dans le champ `<artifactId>` du
      fichier `pom.xml`.
 - [] Réaliser l'Analyse syntaxique (JFlex+CUP) première version,
      c'est-à-dire **SANS** la construction de l'AST à l'aide les
