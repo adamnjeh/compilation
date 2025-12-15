@@ -33,17 +33,78 @@ action code {:
 /* Section 3 : les symboles pour les règles syntaxiques */
 /* avec ensuite les règles de précédence                */
 /* Lexèmes (Tokens) */
-terminal MOT;
+terminal CLASS, EXTENDS, PUBLIC, RETURN, INT, NEW, NULL;
+terminal SYSTEM, OUT, PRINTLN;
+terminal LBRACE, RBRACE, LPAREN, RPAREN, SEMI, DOT, COMMA, ASSIGN;
+terminal IDENT, INTEGER_LITERAL;
 
 /* Lexèmes avec valeur sémantique */
-nonterminal axiome;
-nonterminal motpoursquelette;
+non terminal axiome, classeList, classe, parent, classeCorps, elementCorps;
+non terminal attribut, methode, type, identificateur;
+non terminal parametres, instructions, instruction, expression;
 
 /* Variables de la grammaire et Arbre de syntaxe */
 
 /* Section 4 : les règles syntaxiques avec les actions  */
-axiome     ::= /* vide */
-            |  axiome motpoursquelette
-;
-motpoursquelette ::= MOT
-;
+axiome ::= classeList
+         ;
+
+classeList ::=
+           /* vide */
+         | classeList classe
+         ;
+
+classe ::= CLASS identificateur parent LBRACE classeCorps RBRACE
+         ;
+
+identificateur ::= IDENT
+                 ;
+
+parent ::=
+        /* vide */
+      | EXTENDS identificateur
+      ;
+
+classeCorps ::=
+            /* vide */
+          | classeCorps elementCorps
+          ;
+
+elementCorps ::=
+              attribut
+            | methode
+            ;
+
+attribut ::= type identificateur SEMI
+           ;
+
+type ::= INT
+       | identificateur
+       ;
+
+methode ::= PUBLIC type identificateur LPAREN parametres RPAREN
+            LBRACE instructions RETURN expression SEMI RBRACE
+          ;
+
+parametres ::=
+            /* vide */
+          | type identificateur
+          /* défi: pour plusieurs paramètres, ajouter une liste avec COMMA */
+          ;
+
+instructions ::=
+              /* vide */
+            | instructions instruction
+            ;
+
+instruction ::=
+              SYSTEM DOT OUT DOT PRINTLN LPAREN expression RPAREN SEMI
+            | identificateur ASSIGN expression SEMI
+            ;
+
+expression ::=
+              INTEGER_LITERAL
+            | identificateur
+            | NULL
+            | NEW identificateur LPAREN RPAREN
+            ;

@@ -36,7 +36,30 @@ Ignore     = {WS} | {EOLComment} | {C89Comment}
 /* Section 3 : règles lexicales sous la forme :              */
 /* Rexexp  { /* Actions = code Java */ }                     */
 
-//// Ignore, Ramasse Miette
-{Ignore}           { }
-[^]                { return TOKEN(MOT); }
-//[^]                { WARN("Invalid char '" + yytext() + "'"); return TOKEN(error); }
+"class"                    { return TOKEN(CLASS); }
+"extends"                  { return TOKEN(EXTENDS); }
+"public"                   { return TOKEN(PUBLIC); }
+"return"                   { return TOKEN(RETURN); }
+"int"                      { return TOKEN(INT); }
+"new"                      { return TOKEN(NEW); }
+"null"                     { return TOKEN(NULL); }
+
+"System"                   { return TOKEN(SYSTEM); }
+"out"                      { return TOKEN(OUT); }
+"println"                  { return TOKEN(PRINTLN); }
+
+"{"                        { return TOKEN(LBRACE); }
+"}"                        { return TOKEN(RBRACE); }
+"("                        { return TOKEN(LPAREN); }
+")"                        { return TOKEN(RPAREN); }
+";"                        { return TOKEN(SEMI); }
+"."                        { return TOKEN(DOT); }
+","                        { return TOKEN(COMMA); }
+"="                        { return TOKEN(ASSIGN); }
+
+[0-9]+                     { return TOKEN(INTEGER_LITERAL); }
+[A-Za-z_][A-Za-z0-9_]*     { return TOKEN(IDENT); }
+
+{Ignore}           		   { }
+[^]                        { WARN("Caractère inattendu: '" + yytext() + "'"); }
+
