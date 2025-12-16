@@ -10,21 +10,16 @@ parser code {:
   }
 :}
 
-non terminal Corps classeCorps;
 
 
-/* ----- Terminals (keywords) ----- */
 terminal CLASS, EXTENDS, PUBLIC, RETURN, INT, NEW, NULL;
 terminal SYSTEM, OUT, PRINTLN;
 
-/* ----- Terminals (punctuation) ----- */
 terminal LBRACE, RBRACE, LPAREN, RPAREN, SEMI, DOT, COMMA, ASSIGN;
 
-/* ----- Terminals with values ----- */
 terminal String IDENT;
 terminal String INTEGER_LITERAL;
 
-/* ----- Non terminals ----- */
 non terminal Axiome axiome;
 non terminal AstList<Classe> classeList;
 non terminal Classe classe;
@@ -32,6 +27,7 @@ non terminal Classe classe;
 non terminal Ident ident;
 non terminal Ident parentOpt;             /* parent: Ident("Object") if empty */
 
+non terminal Corps classeCorps;
 non terminal AstList<Attribut> attributs;
 non terminal Attribut attribut;
 
@@ -50,14 +46,10 @@ non terminal Exp expression;
 
 start with axiome;
 
-/* ================== Grammar ================== */
-
-/* Axiome -> ClasseList */
 axiome ::= classeList:cl
          {: RESULT = new Axiome(cl); :}
          ;
 
-/* ClasseList ::= vide | (Classe)+ */
 classeList ::=
            /* empty */
          {: RESULT = new AstList<Classe>(); :}
@@ -65,12 +57,10 @@ classeList ::=
          {: cl.add(c); RESULT = cl; :}
          ;
 
-/* Classe ::= "class" Ident Parent "{" ClasseCorps "}" */
 classe ::= CLASS ident:n parentOpt:p LBRACE classeCorps:cc RBRACE
          {: RESULT = new Classe(n, p, cc.attrs, cc.meths); :}
          ;
 
-/* Parent ::= ("extends" Ident)?  */
 parentOpt ::=
            /* empty */
          {: RESULT = new Ident("Object"); :}
@@ -78,8 +68,6 @@ parentOpt ::=
          {: RESULT = p; :}
          ;
 
-/* ClasseCorps ::= vide | (Attribut|Methode)+
-   We implement it as: Attributs* then Methodes* (works for your test). */
 classeCorps ::=
             /* empty */
           {: RESULT = new Corps(); :}
@@ -90,26 +78,21 @@ classeCorps ::=
           ;
 
 
-/* Attribut ::= Type Ident ";" */
 attribut ::= type:t ident:i SEMI
            {: RESULT = new Attribut(t, i); :}
            ;
 
-/* Type ::= "int" | Ident */
 type ::= INT
        {: RESULT = new Type("int"); :}
        | ident:i
        {: RESULT = new Type(i.nom); :}
        ;
 
-/* Méthode ::= "public" Type Ident "(" Paramètres ")"
-               "{" Instructions "return" Expression ";" "}" */
 methode ::= PUBLIC type:t ident:n LPAREN parametres:ps RPAREN
             LBRACE instructions:is RETURN expression:e SEMI RBRACE
           {: RESULT = new Methode(t, n, ps, is, e); :}
           ;
 
-/* Paramètres ::= vide | Type Ident ("," Type Ident)* */
 parametres ::=
             /* empty */
           {: RESULT = new AstList<Parametre>(); :}
@@ -123,7 +106,6 @@ parametre ::= type:t ident:i
             {: RESULT = new Parametre(t, i); :}
             ;
 
-/* Instructions ::= vide | Instruction+ */
 instructions ::=
               /* empty */
             {: RESULT = new AstList<Instruction>(); :}
@@ -131,7 +113,6 @@ instructions ::=
             {: is.add(i); RESULT = is; :}
             ;
 
-/* Instruction ::= println | assign */
 instruction ::=
               SYSTEM DOT OUT DOT PRINTLN LPAREN expression:e RPAREN SEMI
             {: RESULT = new InstrPrintln(e); :}
@@ -139,7 +120,6 @@ instruction ::=
             {: RESULT = new InstrAssign(i, e); :}
             ;
 
-/* Expression ::= intlit | ident | null | new Ident() */
 expression ::=
               INTEGER_LITERAL:s
             {: RESULT = new ExpEntier(Integer.parseInt(s)); :}
@@ -151,7 +131,6 @@ expression ::=
             {: RESULT = new ExpNew(i); :}
             ;
 
-/* Identificateur ::= <IDENT> */
 ident ::= IDENT:s
         {: RESULT = new Ident(s); :}
         ;
