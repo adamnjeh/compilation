@@ -1,110 +1,157 @@
 package compil;
-import compil.ast.*; // définition de l'AST
-/* Section 1 : code utilisateur inclus en préambule de   */
-/* la classe de l'analyseur syntaxique : package, import */
 
-/* Section 2 : code ajouté dans l'analyseur syntaxique   */
-init with {:
-/* code dans le constructeur de la classe de l'analyseur */
-/* syntaxique : action initiale dans user_init           */
-System.out.println("Début de l'analyse syntaxique.");
-:}
+import java_cup.runtime.*;
+import compil.ast.*;
 
 parser code {:
-/* code dans la classe de l'analyseur syntaxique        */
-  static void prompt() { System.out.print("> "); }
-// Table de symboles (static et classe parser pour visibilité)
-public static java.util.Map<String, Integer> symTab = new java.util.HashMap<>() ;
-// Gestion des variables non initialisées
-public static Integer symTabGet(String v) {
-  Integer val = symTab.get(v);
-  if (val!=null) return val ;
-  System.out.println("Warning : " + v + " non initialisé");
-  symTab.put(v,0);  // initialisation implicite 
-  return 0;
-}
+  static class Corps {
+    AstList<Attribut> attrs = new AstList<>();
+    AstList<Methode> meths = new AstList<>();
+  }
 :}
 
-action code {:
-/* code dans la classe interne "action" de l'analyseur  */
-/* syntaxique : du code utilitaire pour les actions     */
-:};
+non terminal Corps classeCorps;
 
-/* Section 3 : les symboles pour les règles syntaxiques */
-/* avec ensuite les règles de précédence                */
-/* Lexèmes (Tokens) */
+
+/* ----- Terminals (keywords) ----- */
 terminal CLASS, EXTENDS, PUBLIC, RETURN, INT, NEW, NULL;
 terminal SYSTEM, OUT, PRINTLN;
+
+/* ----- Terminals (punctuation) ----- */
 terminal LBRACE, RBRACE, LPAREN, RPAREN, SEMI, DOT, COMMA, ASSIGN;
-terminal IDENT, INTEGER_LITERAL;
 
-/* Lexèmes avec valeur sémantique */
-non terminal axiome, classeList, classe, parent, classeCorps, elementCorps;
-non terminal attribut, methode, type, identificateur;
-non terminal parametres, instructions, instruction, expression;
+/* ----- Terminals with values ----- */
+terminal String IDENT;
+terminal String INTEGER_LITERAL;
 
-/* Variables de la grammaire et Arbre de syntaxe */
+/* ----- Non terminals ----- */
+non terminal Axiome axiome;
+non terminal AstList<Classe> classeList;
+non terminal Classe classe;
 
-/* Section 4 : les règles syntaxiques avec les actions  */
-axiome ::= classeList
+non terminal Ident ident;
+non terminal Ident parentOpt;             /* parent: Ident("Object") if empty */
+
+non terminal AstList<Attribut> attributs;
+non terminal Attribut attribut;
+
+non terminal AstList<Methode> methodes;
+non terminal Methode methode;
+
+non terminal Type type;
+
+non terminal AstList<Parametre> parametres;
+non terminal Parametre parametre;
+
+non terminal AstList<Instruction> instructions;
+non terminal Instruction instruction;
+
+non terminal Exp expression;
+
+start with axiome;
+
+/* ================== Grammar ================== */
+
+/* Axiome -> ClasseList */
+axiome ::= classeList:cl
+         {: RESULT = new Axiome(cl); :}
          ;
 
+/* ClasseList ::= vide | (Classe)+ */
 classeList ::=
-           /* vide */
-         | classeList classe
+           /* empty */
+         {: RESULT = new AstList<Classe>(); :}
+         | classeList:cl classe:c
+         {: cl.add(c); RESULT = cl; :}
          ;
 
-classe ::= CLASS identificateur parent LBRACE classeCorps RBRACE
+/* Classe ::= "class" Ident Parent "{" ClasseCorps "}" */
+classe ::= CLASS ident:n parentOpt:p LBRACE classeCorps:cc RBRACE
+         {: RESULT = new Classe(n, p, cc.attrs, cc.meths); :}
          ;
 
-identificateur ::= IDENT
-                 ;
+/* Parent ::= ("extends" Ident)?  */
+parentOpt ::=
+           /* empty */
+         {: RESULT = new Ident("Object"); :}
+         | EXTENDS ident:p
+         {: RESULT = p; :}
+         ;
 
-parent ::=
-        /* vide */
-      | EXTENDS identificateur
-      ;
-
+/* ClasseCorps ::= vide | (Attribut|Methode)+
+   We implement it as: Attributs* then Methodes* (works for your test). */
 classeCorps ::=
-            /* vide */
-          | classeCorps elementCorps
+            /* empty */
+          {: RESULT = new Corps(); :}
+          | classeCorps:cc attribut:a
+          {: cc.attrs.add(a); RESULT = cc; :}
+          | classeCorps:cc methode:m
+          {: cc.meths.add(m); RESULT = cc; :}
           ;
 
-elementCorps ::=
-              attribut
-            | methode
-            ;
 
-attribut ::= type identificateur SEMI
+/* Attribut ::= Type Ident ";" */
+attribut ::= type:t ident:i SEMI
+           {: RESULT = new Attribut(t, i); :}
            ;
 
+/* Type ::= "int" | Ident */
 type ::= INT
-       | identificateur
+       {: RESULT = new Type("int"); :}
+       | ident:i
+       {: RESULT = new Type(i.nom); :}
        ;
 
-methode ::= PUBLIC type identificateur LPAREN parametres RPAREN
-            LBRACE instructions RETURN expression SEMI RBRACE
+/* Méthode ::= "public" Type Ident "(" Paramètres ")"
+               "{" Instructions "return" Expression ";" "}" */
+methode ::= PUBLIC type:t ident:n LPAREN parametres:ps RPAREN
+            LBRACE instructions:is RETURN expression:e SEMI RBRACE
+          {: RESULT = new Methode(t, n, ps, is, e); :}
           ;
 
+/* Paramètres ::= vide | Type Ident ("," Type Ident)* */
 parametres ::=
-            /* vide */
-          | type identificateur
-          /* défi: pour plusieurs paramètres, ajouter une liste avec COMMA */
+            /* empty */
+          {: RESULT = new AstList<Parametre>(); :}
+          | parametre:p
+          {: AstList<Parametre> l = new AstList<Parametre>(); l.add(p); RESULT = l; :}
+          | parametres:ps COMMA parametre:p
+          {: ps.add(p); RESULT = ps; :}
           ;
 
+parametre ::= type:t ident:i
+            {: RESULT = new Parametre(t, i); :}
+            ;
+
+/* Instructions ::= vide | Instruction+ */
 instructions ::=
-              /* vide */
-            | instructions instruction
+              /* empty */
+            {: RESULT = new AstList<Instruction>(); :}
+            | instructions:is instruction:i
+            {: is.add(i); RESULT = is; :}
             ;
 
+/* Instruction ::= println | assign */
 instruction ::=
-              SYSTEM DOT OUT DOT PRINTLN LPAREN expression RPAREN SEMI
-            | identificateur ASSIGN expression SEMI
+              SYSTEM DOT OUT DOT PRINTLN LPAREN expression:e RPAREN SEMI
+            {: RESULT = new InstrPrintln(e); :}
+            | ident:i ASSIGN expression:e SEMI
+            {: RESULT = new InstrAssign(i, e); :}
             ;
 
+/* Expression ::= intlit | ident | null | new Ident() */
 expression ::=
-              INTEGER_LITERAL
-            | identificateur
+              INTEGER_LITERAL:s
+            {: RESULT = new ExpEntier(Integer.parseInt(s)); :}
+            | ident:i
+            {: RESULT = new ExpIdent(i); :}
             | NULL
-            | NEW identificateur LPAREN RPAREN
+            {: RESULT = new ExpNull(); :}
+            | NEW ident:i LPAREN RPAREN
+            {: RESULT = new ExpNew(i); :}
             ;
+
+/* Identificateur ::= <IDENT> */
+ident ::= IDENT:s
+        {: RESULT = new Ident(s); :}
+        ;

@@ -60,4 +60,26 @@ public class AstVisitorDefault implements AstVisitor {
     public void visit(Type n) {
         defaultVisit(n);
     }
+    
+    @Override
+    public void visit(Parametre n) { defaultVisit(n); }
+
+    @Override
+    public void visit(Methode n) { defaultVisit(n); }
+
+    @Override
+    public void visit(Instruction n) { defaultVisit(n); }
+
+    @Override
+    public void visit(InstrPrintln n) { defaultVisit(n); }
+
+    @Override
+    public void visit(InstrAssign n) { defaultVisit(n); }
+
+    @Override
+    public void visit(ExpNull n) { defaultVisit(n); }
+
+    @Override
+    public void visit(ExpNew n) { defaultVisit(n); }
+   
 }

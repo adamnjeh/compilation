@@ -1,65 +1,83 @@
-/* Section 1 : code utilisateur inclus en préambule de   */
-/* la classe de l'analyseur lexical : package et import  */
-package compil; // nom du paquetage à adapter
+package compil;
+
+import java_cup.runtime.Symbol;
+import java_cup.runtime.SymbolFactory;
+
 %%
-/* Section 2 : directives, blocs, définitions régulières */
-/* - des directives : "%..."                             */
-/* - des blocs : "%...{"  ...  "%...}"                   */
-/* - des définitions régulières : Nom = Regexp           */ 
-%include Jflex.include
-%include JflexCup.include
+
+%public
+%class Yylex
+%unicode
+%line
+%column
+%char
+
+%cup
+%function next_token
+%type java_cup.runtime.Symbol
+
+%eofval{
+  return token(sym.EOF, null);
+%eofval}
 
 %{
-/* code dans la classe de l'analyseur : attributs et     */
-/* méthodes utiles pour les actions                      */
+  private SymbolFactory sf;
+
+  public Yylex(java.io.Reader in, SymbolFactory sf) {
+    this(in);
+    this.sf = sf;
+  }
+
+  private Symbol token(int code, Object value) {
+    if (sf != null) return sf.newSymbol(sym.terminalNames[code], code, value);
+    return new Symbol(code, value);
+  }
+
+  private Symbol token(int code) { return token(code, null); }
+
+  private Symbol errorTok() {
+    Compiler.incrementFailures();
+    return token(sym.error, yytext());
+  }
 %}
 
-%init{
-/* code dans le constructeur : action initiale           */
-%init}
-
-%eof{
-/* code en action finale à la sortie de l'analyseur      */
-System.out.println("Fin de l'analyse lexicale.");
-%eof}
-
-// %caseless            /* confondre minuscules/majuscules   */
-// %state   ETAT, ETAT2 /* États inclusifs du super-automate */
-// %xstate  STATE       /* États exclusifs du super-automate */
-
-WS         = [ \t\f] | \R
-EOLComment = "//" .*
-C89Comment = "/*" [^*]* ("*" ([^*/] [^*]*)?)* "*/"
-Ignore     = {WS} | {EOLComment} | {C89Comment}
+WhiteSpace = [ \t\r\n\f]+
+Ident      = [A-Za-z_][A-Za-z0-9_]*
+IntLit     = [0-9]+
 
 %%
-/* Section 3 : règles lexicales sous la forme :              */
-/* Rexexp  { /* Actions = code Java */ }                     */
 
-"class"                    { return TOKEN(CLASS); }
-"extends"                  { return TOKEN(EXTENDS); }
-"public"                   { return TOKEN(PUBLIC); }
-"return"                   { return TOKEN(RETURN); }
-"int"                      { return TOKEN(INT); }
-"new"                      { return TOKEN(NEW); }
-"null"                     { return TOKEN(NULL); }
+{WhiteSpace}               { /* ignore */ }
+"//".*                     { /* ignore */ }
+"/*"([^*]|\*+[^*/])*\*+"/" { /* ignore */ }
 
-"System"                   { return TOKEN(SYSTEM); }
-"out"                      { return TOKEN(OUT); }
-"println"                  { return TOKEN(PRINTLN); }
+/* keywords */
+"class"     { return token(sym.CLASS); }
+"extends"   { return token(sym.EXTENDS); }
+"public"    { return token(sym.PUBLIC); }
+"return"    { return token(sym.RETURN); }
+"int"       { return token(sym.INT); }
+"new"       { return token(sym.NEW); }
+"null"      { return token(sym.NULL); }
 
-"{"                        { return TOKEN(LBRACE); }
-"}"                        { return TOKEN(RBRACE); }
-"("                        { return TOKEN(LPAREN); }
-")"                        { return TOKEN(RPAREN); }
-";"                        { return TOKEN(SEMI); }
-"."                        { return TOKEN(DOT); }
-","                        { return TOKEN(COMMA); }
-"="                        { return TOKEN(ASSIGN); }
+/* println chain */
+"System"    { return token(sym.SYSTEM); }
+"out"       { return token(sym.OUT); }
+"println"   { return token(sym.PRINTLN); }
 
-[0-9]+                     { return TOKEN(INTEGER_LITERAL); }
-[A-Za-z_][A-Za-z0-9_]*     { return TOKEN(IDENT); }
+/* punctuation */
+"{"         { return token(sym.LBRACE); }
+"}"         { return token(sym.RBRACE); }
+"("         { return token(sym.LPAREN); }
+")"         { return token(sym.RPAREN); }
+";"         { return token(sym.SEMI); }
+"."         { return token(sym.DOT); }
+","         { return token(sym.COMMA); }
+"="         { return token(sym.ASSIGN); }
 
-{Ignore}           		   { }
-[^]                        { WARN("Caractère inattendu: '" + yytext() + "'"); }
+/* values */
+{IntLit}    { return token(sym.INTEGER_LITERAL, yytext()); }
+{Ident}     { return token(sym.IDENT, yytext()); }
 
+/* fallback */
+.           { return errorTok(); }

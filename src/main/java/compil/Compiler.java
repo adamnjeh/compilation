@@ -4,6 +4,7 @@ package compil;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
+import compil.ast.Axiome;
 import compil.util.CompilerException;
 import compil.util.Debug;
 import java_cup.runtime.SymbolFactory;
@@ -103,15 +104,15 @@ public class Compiler {
             } else {
                 axiome = result.value;
 // DÉBUT du code à « dé-commenter »
-//                Debug.PW.println("Analyse syntaxique , Axiome = " + axiome);
-//                if (axiome instanceof Axiome racineAST) {
-//                    System.out.println(racineAST.toPrint());
+                Debug.PW.println("Analyse syntaxique , Axiome = " + axiome);
+                if (axiome instanceof Axiome racineAST) {
+                    System.out.println(racineAST.toPrint());
 //                    new VisiteurAttributsParametresVariablesAvecPorteee(racineAST);
-//                } else {
-//                    Debug.PW.println(
-//                            "La racine devrait être un nœud Axiome (" + axiome.getClass().getCanonicalName() + ")");
-//                    Compiler.incrementFailures();
-//                }
+                } else {
+                    Debug.PW.println(
+                            "La racine devrait être un nœud Axiome (" + axiome.getClass().getCanonicalName() + ")");
+                    Compiler.incrementFailures();
+                }
 // FIN du code à « dé-commenter »
             }
         } catch (RuntimeException e) {

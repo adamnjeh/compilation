@@ -28,4 +28,15 @@ public interface AstVisitor {
     void visit(Ident n);
     
     void visit(Type n);
+    
+    void visit(Parametre n);
+    void visit(Methode n);
+
+    void visit(Instruction n);
+    void visit(InstrPrintln n);
+    void visit(InstrAssign n);
+
+    void visit(ExpNull n);
+    void visit(ExpNew n);
+
 }
