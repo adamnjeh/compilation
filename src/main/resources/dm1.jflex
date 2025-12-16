@@ -5,7 +5,7 @@ package compil;
 %include JflexCup.include
 
 WhiteSpace = [ \t\r\n\f]+
-Ident      = [A-Za-z_][A-Za-z0-9_]*
+Ident      = [A-Za-z_][A-Za-z0-9_]* // 
 IntLit     = [0-9]+
 
 %%

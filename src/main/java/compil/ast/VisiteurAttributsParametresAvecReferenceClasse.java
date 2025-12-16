@@ -33,7 +33,7 @@ public class VisiteurAttributsParametresAvecReferenceClasse extends AstVisitorDe
         Debug.log(out);
     }
 
-    /** Bonus: AstList transparent */
+    /** AstList transparent */
     @Override
     public <T extends AstNode> void visit(AstList<T> n) {
         for (AstNode x : n) {

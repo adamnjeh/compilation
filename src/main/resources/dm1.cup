@@ -1,6 +1,7 @@
 package compil;
 
 import java_cup.runtime.*;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 import compil.ast.*;
 
 parser code {:
@@ -9,8 +10,6 @@ parser code {:
     AstList<Methode> meths = new AstList<>();
   }
 :}
-
-
 
 terminal CLASS, EXTENDS, PUBLIC, RETURN, INT, NEW, NULL;
 terminal SYSTEM, OUT, PRINTLN;
@@ -25,13 +24,11 @@ non terminal AstList<Classe> classeList;
 non terminal Classe classe;
 
 non terminal Ident ident;
-non terminal Ident parentOpt;             
+non terminal Ident parentOpt;
 
 non terminal Corps classeCorps;
-non terminal AstList<Attribut> attributs;
-non terminal Attribut attribut;
 
-non terminal AstList<Methode> methodes;
+non terminal Attribut attribut;
 non terminal Methode methode;
 
 non terminal Type type;
@@ -46,8 +43,12 @@ non terminal Exp expression;
 
 start with axiome;
 
+
 axiome ::= classeList:cl
-         {: RESULT = new Axiome(cl); :}
+         {: Axiome ax = new Axiome(cl);
+            ax.addPosition(clxleft, clxright);
+            RESULT = ax;
+         :}
          ;
 
 classeList ::=
@@ -57,15 +58,21 @@ classeList ::=
          {: cl.add(c); RESULT = cl; :}
          ;
 
-classe ::= CLASS ident:n parentOpt:p LBRACE classeCorps:cc RBRACE
-         {: RESULT = new Classe(n, p, cc.attrs, cc.meths); :}
+
+classe ::= CLASS:kw ident:n parentOpt:p LBRACE:lb classeCorps:cc RBRACE:rb
+         {: Classe cl = new Classe(n, p, cc.attrs, cc.meths);
+            cl.addPosition(kwxleft, rbxright);
+            RESULT = cl;
+         :}
          ;
 
 parentOpt ::=
            /* empty */
          {: RESULT = new Ident("Object"); :}
-         | EXTENDS ident:p
-         {: RESULT = p; :}
+         | EXTENDS:ex ident:p
+         {: 
+            RESULT = p;
+         :}
          ;
 
 classeCorps ::=
@@ -78,19 +85,32 @@ classeCorps ::=
           ;
 
 
-attribut ::= type:t ident:i SEMI
-           {: RESULT = new Attribut(t, i); :}
+attribut ::= type:t ident:i SEMI:se
+           {: Attribut at = new Attribut(t, i);
+              at.addPosition(txleft, sexright);
+              RESULT = at;
+           :}
            ;
 
-type ::= INT
-       {: RESULT = new Type("int"); :}
+type ::= INT:tint
+       {: Type ty = new Type("int");
+          ty.addPosition(tintxleft, tintxright);
+          RESULT = ty;
+       :}
        | ident:i
-       {: RESULT = new Type(i.nom); :}
+       {: Type ty = new Type(i.nom);
+          ty.addPosition(ixleft, ixright);
+          RESULT = ty;
+       :}
        ;
 
-methode ::= PUBLIC type:t ident:n LPAREN parametres:ps RPAREN
-            LBRACE instructions:is RETURN expression:e SEMI RBRACE
-          {: RESULT = new Methode(t, n, ps, is, e); :}
+
+methode ::= PUBLIC:pub type:t ident:n LPAREN:lp parametres:ps RPAREN:rp
+            LBRACE:lb instructions:is RETURN:ret expression:e SEMI:se RBRACE:rb
+          {: Methode m = new Methode(t, n, ps, is, e);
+             m.addPosition(pubxleft, rbxright);
+             RESULT = m;
+          :}
           ;
 
 parametres ::=
@@ -98,13 +118,17 @@ parametres ::=
           {: RESULT = new AstList<Parametre>(); :}
           | parametre:p
           {: AstList<Parametre> l = new AstList<Parametre>(); l.add(p); RESULT = l; :}
-          | parametres:ps COMMA parametre:p
+          | parametres:ps COMMA:co parametre:p
           {: ps.add(p); RESULT = ps; :}
           ;
 
 parametre ::= type:t ident:i
-            {: RESULT = new Parametre(t, i); :}
+            {: Parametre p = new Parametre(t, i);
+               p.addPosition(txleft, ixright);
+               RESULT = p;
+            :}
             ;
+
 
 instructions ::=
               /* empty */
@@ -114,23 +138,46 @@ instructions ::=
             ;
 
 instruction ::=
-              SYSTEM DOT OUT DOT PRINTLN LPAREN expression:e RPAREN SEMI
-            {: RESULT = new InstrPrintln(e); :}
-            | ident:i ASSIGN expression:e SEMI
-            {: RESULT = new InstrAssign(i, e); :}
+              SYSTEM:sys DOT:d1 OUT:o DOT:d2 PRINTLN:pr LPAREN:lp expression:e RPAREN:rp SEMI:se
+            {: InstrPrintln ip = new InstrPrintln(e);
+               ip.addPosition(sysxleft, sexright);
+               RESULT = ip;
+            :}
+            | ident:i ASSIGN:as expression:e SEMI:se
+            {: InstrAssign ia = new InstrAssign(i, e);
+               ia.addPosition(ixleft, sexright);
+               RESULT = ia;
+            :}
             ;
+
 
 expression ::=
               INTEGER_LITERAL:s
-            {: RESULT = new ExpEntier(Integer.parseInt(s)); :}
+            {: ExpEntier ee = new ExpEntier(Integer.parseInt(s));
+               ee.addPosition(sxleft, sxright);
+               RESULT = ee;
+            :}
             | ident:i
-            {: RESULT = new ExpIdent(i); :}
-            | NULL
-            {: RESULT = new ExpNull(); :}
-            | NEW ident:i LPAREN RPAREN
-            {: RESULT = new ExpNew(i); :}
+            {: ExpIdent ei = new ExpIdent(i);
+               ei.addPosition(ixleft, ixright);
+               RESULT = ei;
+            :}
+            | NULL:nul
+            {: ExpNull en = new ExpNull();
+               en.addPosition(nulxleft, nulxright);
+               RESULT = en;
+            :}
+            | NEW:nw ident:i LPAREN:lp RPAREN:rp
+            {: ExpNew en = new ExpNew(i);
+               en.addPosition(nwxleft, rpxright);
+               RESULT = en;
+            :}
             ;
 
+
 ident ::= IDENT:s
-        {: RESULT = new Ident(s); :}
+        {: Ident id = new Ident(s);
+           id.addPosition(sxleft, sxright);
+           RESULT = id;
+        :}
         ;

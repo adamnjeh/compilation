@@ -33,7 +33,7 @@ public class VisiteurAttributsParametresVariablesAvecPorteee extends AstVisitorD
         Debug.log(out);
     }
 
-    /** Bonus transparent AstList (ne complique pas) */
+    /** transparent AstList */
     @Override
     public <T extends AstNode> void visit(AstList<T> n) {
         for (AstNode x : n) {

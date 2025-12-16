@@ -109,7 +109,7 @@ public class Compiler {
                 Debug.PW.println("Analyse syntaxique , Axiome = " + axiome);
                 if (axiome instanceof Axiome racineAST) {
                     System.out.println(racineAST.toPrint());
-//                    new VisiteurAttributsParametresVariablesAvecPorteee(racineAST);
+                    new VisiteurAttributsParametresVariablesAvecPorteee(racineAST);
                     new VisiteurAttributsParametresAvecReferenceClasse(racineAST);
                 } else {
                     Debug.PW.println(

@@ -28,13 +28,13 @@ Cocher une case à cocher ([X]) lorsque la tâche est accomplie.
 - [x] Indiquer les noms et prénoms dans la section précédante.
 - [x] Indiquer les noms et prénoms dans le champ `<artifactId>` du
      fichier `pom.xml`.
-- [] Réaliser l'Analyse syntaxique (JFlex+CUP) première version,
+- [x] Réaliser l'Analyse syntaxique (JFlex+CUP) première version,
      c'est-à-dire **SANS** la construction de l'AST à l'aide les
      classes du paquetage `compil.ast` fournies dans le squelette.
-- [] Ajouter la construction de l'AST, c'est-à-dire **AVEC** la
+- [x] Ajouter la construction de l'AST, c'est-à-dire **AVEC** la
      construction de l'arbre à l'aide des classes du paquetage
      `compil.ast`.
-- [] Réaliser le visiteur.
+- [x] Réaliser le visiteur.
 
 **Pour livrer :**
 
