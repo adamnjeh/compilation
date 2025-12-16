@@ -2,7 +2,7 @@ class Test1 {
   int a;
  int s;
   public int calculer(int i) {
-    System.out.println(a);
+    System.out.println(45);
     System.out.println(i);
     System.out.println(a);
     return k;

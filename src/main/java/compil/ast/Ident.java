@@ -10,9 +10,11 @@ public class Ident extends AstNode {
         super();
         this.nom = nom;
     }
+   
 
     @Override
     public void accept(AstVisitor v) {
         v.visit(this);
     }
+
 }

@@ -13,11 +13,7 @@ public class ExpIdent extends Exp {
 
     @Override
     public String toString() {
-        return super.toString() + "(" + ident.toString() + ")";
+        return super.toString() + "(" + ident.nom + ")";
     }
 
-    @Override
-    public void accept(AstVisitor v) {
-        v.visit(this);
-   }
 }

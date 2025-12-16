@@ -18,7 +18,7 @@ public class Methode extends AstNode {
         this.instructions = instructions;
         this.expRetour = expRetour;
     }
-
+    
     @Override
     public void accept(AstVisitor v) {
         v.visit(this);

@@ -10,9 +10,9 @@ public class ExpEntier extends Exp {
 	    super();
 		this.value = value;
 	}
-
+	
 	@Override
-	public void accept(AstVisitor v) {
-        v.visit(this);
-	}
+    public String toString() {
+        return super.toString() + "(" + value + ")";
+    }
 }

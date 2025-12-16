@@ -25,7 +25,7 @@ non terminal AstList<Classe> classeList;
 non terminal Classe classe;
 
 non terminal Ident ident;
-non terminal Ident parentOpt;             /* parent: Ident("Object") if empty */
+non terminal Ident parentOpt;             
 
 non terminal Corps classeCorps;
 non terminal AstList<Attribut> attributs;
