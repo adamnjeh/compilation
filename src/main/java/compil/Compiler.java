@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import compil.ast.Axiome;
+import compil.ast.VisiteurAttributsParametresAvecReferenceClasse;
+import compil.ast.VisiteurAttributsParametresVariablesAvecPorteee;
 import compil.util.CompilerException;
 import compil.util.Debug;
 import java_cup.runtime.SymbolFactory;
@@ -107,7 +109,7 @@ public class Compiler {
                 Debug.PW.println("Analyse syntaxique , Axiome = " + axiome);
                 if (axiome instanceof Axiome racineAST) {
                     System.out.println(racineAST.toPrint());
-//                    new VisiteurAttributsParametresVariablesAvecPorteee(racineAST);
+                    new VisiteurAttributsParametresAvecReferenceClasse(racineAST);
                 } else {
                     Debug.PW.println(
                             "La racine devrait être un nœud Axiome (" + axiome.getClass().getCanonicalName() + ")");

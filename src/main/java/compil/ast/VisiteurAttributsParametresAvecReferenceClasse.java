@@ -7,16 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Visiteur: affiche attributs et paramètres dans leur portée
- * au format demandé.
+ * 2ème visiteur: affiche attributs et paramètres avec leur référence de classe
+ * (si le type est une classe, i.e. type != int).
  */
-public class VisiteurAttributsParametresVariablesAvecPorteee extends AstVisitorDefault {
+public class VisiteurAttributsParametresAvecReferenceClasse extends AstVisitorDefault {
 
     private final IndentWriter out = new IndentWriter();
 
     private String currentClass = null;
 
-    private List<String> classAttributs = new ArrayList<>();
+    private List<String> classItems = new ArrayList<>();
     private List<MethInfo> classMethods = new ArrayList<>();
 
     private static class MethInfo {
@@ -27,13 +27,13 @@ public class VisiteurAttributsParametresVariablesAvecPorteee extends AstVisitorD
 
     private MethInfo currentMethodInfo = null;
 
-    public VisiteurAttributsParametresVariablesAvecPorteee(Axiome axiome) {
-        out.println("Affichage des identificateurs dans leur portée : ");
+    public VisiteurAttributsParametresAvecReferenceClasse(Axiome axiome) {
+        out.println("Affichage des identificateurs dans leur portée et leur référence de classe : ");
         axiome.accept(this);
         Debug.log(out);
     }
 
-    /** Bonus transparent AstList (ne complique pas) */
+    /** Bonus: AstList transparent */
     @Override
     public <T extends AstNode> void visit(AstList<T> n) {
         for (AstNode x : n) {
@@ -43,55 +43,44 @@ public class VisiteurAttributsParametresVariablesAvecPorteee extends AstVisitorD
 
     @Override
     public void visit(Classe n) {
-        // reset collecte de la classe
         currentClass = n.nom.nom;
-        classAttributs = new ArrayList<>();
+        classItems = new ArrayList<>();
         classMethods = new ArrayList<>();
 
-        // collecter via parcours
         super.visit(n);
 
-        // afficher la classe au format demandé
         out.println(currentClass + " (classe) {");
         out.indent();
 
-        // attributs (avec virgule)
-        for (String a : classAttributs) {
-            out.println(a + " (attribut), ");
+        for (String item : classItems) {
+            out.println(item + ", ");
         }
 
-        // méthodes
         for (MethInfo m : classMethods) {
             out.println(m.name + " (méthode) {");
             out.indent();
             for (String p : m.params) {
-                out.println(p + " (paramètre), ");
+                out.println(p + ", ");
             }
-            // pas de unindent()
             out.println("}");
         }
 
-        // pas de unindent()
         out.println("}");
-
         currentClass = null;
     }
 
     @Override
     public void visit(Attribut n) {
-        // collecter seulement si on est dans une classe (pas dans une méthode)
         if (currentClass != null && currentMethodInfo == null) {
-            classAttributs.add(n.ident.nom);
+            classItems.add(formatWithRefIfClass(n.ident.nom, n.type) + " (attribut)");
         }
     }
 
     @Override
     public void visit(Methode n) {
-        // créer la méthode et collecter ses paramètres
         currentMethodInfo = new MethInfo(n.nom.nom);
         classMethods.add(currentMethodInfo);
 
-        // visiter params (et seulement params)
         if (n.params != null) n.params.accept(this);
 
         currentMethodInfo = null;
@@ -100,7 +89,13 @@ public class VisiteurAttributsParametresVariablesAvecPorteee extends AstVisitorD
     @Override
     public void visit(Parametre n) {
         if (currentMethodInfo != null) {
-            currentMethodInfo.params.add(n.ident.nom);
+            currentMethodInfo.params.add(formatWithRefIfClass(n.ident.nom, n.type) + " (paramètre)");
         }
+    }
+
+    private String formatWithRefIfClass(String name, Type t) {
+        if (t == null || t.nom == null) return name;
+        if ("int".equals(t.nom)) return name;
+        return name + " (réf classe `" + t.nom + "')";
     }
 }

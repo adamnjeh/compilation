@@ -1,9 +1,10 @@
 class Test1 {
   int a;
-
+ int s;
   public int calculer(int i) {
     System.out.println(a);
     System.out.println(i);
+    System.out.println(a);
     return k;
   }
 
@@ -14,9 +15,12 @@ class Test1 {
 
 class Test2 extends Test1 {
   Test1 attribut1;
+  int a;
+  Test1 att2;
   public int zero(Test1 variable1) {
     attribut1 = null;
     attribut1 = variable1;
+    System.out.println(variable1);
     attribut1 = new Test1();
     return 0;
   }
